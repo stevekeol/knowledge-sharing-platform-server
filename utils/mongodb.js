@@ -8,7 +8,7 @@ const models = require('./models.js');
 const common = require('./common.js');
 
 //数据库连接
-mongoose.connect('mongodb://127.0.0.1:27017/ncp', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://BFChainer:zhangjie2020@127.0.0.1:27017/bnqkl', { useNewUrlParser: true, useUnifiedTopology: true });
 
 
 const wechatInfoModel = mongoose.model('wechatInfo', models.getSchema('wechatInfo')); 
