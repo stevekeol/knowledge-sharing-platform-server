@@ -12,6 +12,7 @@
     "debug": "~2.6.3",
     "ejs": "^2.7.3",
     "express": "~4.15.2",
+    "formidable": "^1.2.2",
     "jade": "~1.11.0",
     "jsonfile": "^3.0.0",
     "mongoose": "^5.7.11",
