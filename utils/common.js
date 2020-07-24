@@ -5,7 +5,7 @@ const QUERYSTRING = require('querystring');
 
 // 取出查询参数(从完整url中取出某个具体的参数)
 const getRequestParam = function (req, param) {
-	var params = QUERYSTRING.parse(URL.parse(req.url).query);
+	let params = QUERYSTRING.parse(URL.parse(req.url).query);
 	return params[param];
 };
 
@@ -40,6 +40,25 @@ const formatNumber = n => {
   return n[1] ? n : '0' + n;
 }
 
+//获取本机IP地址
+const getAddressIp = () => {
+  let interfaces = require('os').networkInterfaces(); //引用了os核心模块
+  for(let devName in interfaces){
+      let iface = interfaces[devName];
+      for(let i=0; i < iface.length; i++){
+          let alias = iface[i];
+          if( alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal ){
+              return alias.address;
+          }
+      }
+  }  
+}
+
+//获取文件扩展名
+const getExtenName = (str) => str.split('/')[1];
+
 module.exports.getRequestParam = getRequestParam;
 module.exports.formatTime = formatTime;
 module.exports.formatSimpleTime = formatSimpleTime;
+module.exports.getAddressIp = getAddressIp;
+module.exports.getExtenName = getExtenName;

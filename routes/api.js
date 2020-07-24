@@ -7,6 +7,9 @@ const mongodb = require('../utils/mongodb.js');
 const common = require('../utils/common.js');
 const formidable = require('formidable');
 const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+
 
 module.exports.wechatInfo = function(req, res, next) {
 	req.body.wechatInfo.createTime = common.formatTime(new Date());
@@ -87,16 +90,41 @@ module.exports.createUpToken = function(req, res, next) {
 }
 
 //图片上传处理逻辑 - 已验证可使用
-//图片期待返回的格式: 10.27.31.230/images/98129823t9391020340047010.png
+//图片期待返回的格式: 172.30.94.93:9527/images/98129823t9391020340047010.png(markdown中存储的是相对路径，并没有局域网IP)
 module.exports.upload = function(req, res, next) {
+	// console.log(req);
   const form = formidable({ multiples: true });
 
+  function getExtentName(str) {
+  	let res = str.split('/');
+  }
+
   form.parse(req, (err, fields, files) => {
-    if (err) {
+    if(err) {
       next(err);
       return;
     }
-    let result = fs.writeFileSync("images/test.png", fs.readFileSync(files.someExpressFiles.path));
-    res.json({ fields, files });
-  });  
+
+    //修复了editormd编辑器的专属字段bug
+    let file = files.someExpressFiles || files['editormd-image-file'];
+
+    let fileName = `/${uuidv4()}.${common.getExtenName(file.type)}`;
+    let fileUrl = `http://${common.getAddressIp()}:9527/images${fileName}`;
+    console.log(fileName);
+    console.log(fileUrl);
+    console.log(common.getAddressIp());
+    let result = fs.writeFileSync(path.join(__dirname, `../public/images/${fileName}`), fs.readFileSync(file.path));
+    res.json({ 
+      success: 1,   // 0 表示上传失败，1 表示上传成功
+      message: 'success',
+      dialog_id: '156021892199821',
+      url: fileUrl    //上传成功时才返回，就是图片的访问地址
+    });
+  });
+}
+
+//获取区块模拟数据
+module.exports.block = function(req, res, next) {
+	mongodb.getBlock(req.query.height)
+		.then(result => res.json(result));
 }

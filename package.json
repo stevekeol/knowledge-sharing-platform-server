@@ -9,6 +9,8 @@
     "async": "^3.1.0",
     "body-parser": "~1.17.1",
     "cookie-parser": "~1.4.3",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.0.0",
     "debug": "~2.6.3",
     "ejs": "^2.7.3",
     "express": "~4.15.2",
@@ -21,6 +23,7 @@
     "qiniu": "^7.3.0",
     "request": "^2.88.0",
     "serve-favicon": "~2.4.2",
-    "socket.io": "^2.0.3"
+    "socket.io": "^2.0.3",
+    "uuid": "^8.2.0"
   }
 }

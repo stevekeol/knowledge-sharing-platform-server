@@ -40,6 +40,18 @@ const feedback = new Schema({
   createTime: String
 },{autoIndex: false, versionKey: false});
 
+const block = new Schema({
+  height: Number,
+  previousHash: String,
+  timestamp: String,
+  data: String,
+  hash: String
+}, {autoIndex: false, versionKey: false})
+
+const paper = new Schema({
+  
+})
+
 module.exports = {
   getSchema: function(name) {
     switch(name) {
@@ -48,7 +60,9 @@ module.exports = {
       case 'userHelp':
         return userHelp;
       case 'feedback':
-        return feedback;        
+        return feedback;
+      case 'block':
+        return block;      
     }
   }
 };

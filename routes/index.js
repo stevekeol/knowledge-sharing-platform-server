@@ -24,14 +24,16 @@ router.get('/checkout', api.userHelp_checkout);
 router.get('/upToken', api.createUpToken);
 router.get('/allHelps', api.allHelps);
 
+//获取区块链模拟数据
+router.get('/block', api.block);
 
-router.post('/api/upload', api.upload);
+router.post('/upload', api.upload);
 
 //图片上传 - 测试接口
-router.get('/', (req, res, next) => {
+router.get('/test', (req, res, next) => {
   res.send(`
     <h2>With <code>"express"</code> npm package</h2>
-    <form action="/api/upload" enctype="multipart/form-data" method="post">
+    <form action="/upload" enctype="multipart/form-data" method="post">
       <div>Text field title: <input type="text" name="title" /></div>
       <div>File: <input type="file" name="someExpressFiles" multiple="multiple" /></div>
       <input type="submit" value="Upload" />
