@@ -6,7 +6,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var routes = require('./routes/index');
-const cors = require('cors');
+const cors = require('cors'); //真实效果待验证
 
 
 //中间件:格式化打印api时间戳
@@ -18,27 +18,19 @@ const logDate = (req, res, next) => {
   next();
 }
 
-// //解决跨域问题
-// const cors = (req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', '*')
-//   res.header('Access-Control-Allow-Headers', 'Authorization,X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method' )
-//   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PATCH, PUT, DELETE')
-//   res.header('Allow', 'GET, POST, PATCH, OPTIONS, PUT, DELETE')
-//   next();
+// // //解决跨域问题(有了cors模块，就先不用)
+// const cors =  (req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
+//   res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+
+//   if (req.method == 'OPTIONS') {
+//     res.send(200); //让options请求快速返回
+//   }
+//   else {
+//     next();
+//   }
 // }
-
-const cors =  (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
-  res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-
-  if (req.method == 'OPTIONS') {
-    res.send(200); //让options请求快速返回
-  }
-  else {
-    next();
-  }
-}
 
 //中间件:处理错误请求
 const handlerErr = (req, res, next) => {
@@ -49,7 +41,7 @@ const handlerErr = (req, res, next) => {
 
 
 var app = express();
-app.use(cors());
+app.use(cors()); //待测试是否可取消
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(logDate); //打印api的时间戳

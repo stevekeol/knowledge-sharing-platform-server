@@ -1,17 +1,15 @@
-// 前端页面，取出url中参数
-
 const URL = require('url');  
 const QUERYSTRING = require('querystring');
 
 // 取出查询参数(从完整url中取出某个具体的参数)
-const getRequestParam = function (req, param) {
+module.exports.getRequestParam = function (req, param) {
 	let params = QUERYSTRING.parse(URL.parse(req.url).query);
 	return params[param];
 };
 
 
 //取年月日时分秒
-const formatTime = date => {
+module.exports.formatTime = date => {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -23,7 +21,7 @@ const formatTime = date => {
 }
 
 // 取年月日
-const formatSimpleTime = date => {
+module.exports.formatSimpleTime = date => {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -41,7 +39,7 @@ const formatNumber = n => {
 }
 
 //获取本机IP地址
-const getAddressIp = () => {
+module.exports.getAddressIp = () => {
   let interfaces = require('os').networkInterfaces(); //引用了os核心模块
   for(let devName in interfaces){
       let iface = interfaces[devName];
@@ -55,10 +53,4 @@ const getAddressIp = () => {
 }
 
 //获取文件扩展名
-const getExtenName = (str) => str.split('/')[1];
-
-module.exports.getRequestParam = getRequestParam;
-module.exports.formatTime = formatTime;
-module.exports.formatSimpleTime = formatSimpleTime;
-module.exports.getAddressIp = getAddressIp;
-module.exports.getExtenName = getExtenName;
+module.exports.getExtenName = (str) => str.split('/')[1];
