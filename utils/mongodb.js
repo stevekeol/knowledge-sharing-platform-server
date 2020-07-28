@@ -40,7 +40,7 @@ module.exports.articles_get = option => {
   return new Promise((resolve, reject) => {
     ArticleModel
       // .find({ $text: { $search: option.content } })
-      find()
+      .find()
       .then((res) => resolve(res))
       .catch((err) => reject(err));      
   })
