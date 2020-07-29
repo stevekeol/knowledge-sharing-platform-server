@@ -5,13 +5,14 @@ const department = new Schema({
   id: String, //部门id
   parent: String, //父部门id
   subDepartment: Array, //子部门id数组
-  member: Array //员工id数组
+  members: Array //员工id数组
 }, {autoIndex: false, versionKey: false})
 
 const author = new Schema({
   id: String, //作者员工号
   name: String, //作者姓名
-  department: Array,
+  pw: String, //密码
+  departments: Array, //对象数组，对象属性有: 部门id，author在部门的role
   articles: Schema.Types.Mixed, //文件树
 }, {autoIndex: false, versionKey: false})
 
