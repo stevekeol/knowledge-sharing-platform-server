@@ -12,7 +12,7 @@ const generateToken = require('../middleware/generateToken.js');
 ****************************************/
 router.post('/login', generateToken);
 router.post('/article', api.article_post);
-router.get('/article', verifyToken, api.article_get);
+router.get('/article', api.article_get);
 router.get('/articles', api.articles_get);
 router.post('/image', api.uploadImage);
 

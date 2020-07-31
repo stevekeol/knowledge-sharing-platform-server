@@ -17,13 +17,23 @@ module.exports.article_post = (req, res, next) => {
   req.body.updateTime = common.formatTime(new Date());
   if( req.body && req.body.id ) {
     mongodb.article_update(req.body)
-      .then(result => res.json(result));  
+      .then(result => res.json({
+        errCode: 0,
+        errMessage: 'success',
+        result
+      }))
+      .catch(err => res.json(err))
   } else {
     req.body.id = uuid();
     req.body.updateTime = common.formatTime(new Date());
 
     mongodb.article_create(req.body)
-      .then(result => res.json(result));
+      .then(result => res.json({
+        errCode: 0,
+        errMessage: 'success',
+        result
+      }))
+      .catch(err => res.json(err))
   }
 }
 
@@ -33,9 +43,13 @@ module.exports.article_post = (req, res, next) => {
  * @return {Object} article
  */
 module.exports.article_get = (req, res, next) => {
-  console.log(req.user);
   mongodb.article_get(req.query.id)
-    .then(result => res.json(result));
+    .then(result => res.json({
+      errCode: 0,
+      errMessage: 'success',
+      result
+    }))
+    .catch(err => res.json(err))
 }
 
 /**
@@ -46,7 +60,12 @@ module.exports.article_get = (req, res, next) => {
 module.exports.articles_get = (req, res, next) => {
   console.log(req.query);
   mongodb.articles_get(req.query)
-    .then(result => res.json(result));
+    .then(result => res.json({
+      errCode: 0,
+      errMessage: 'success',
+      result
+    }))
+    .catch(err => res.json(err))
 }
 
 /**
@@ -56,6 +75,10 @@ module.exports.articles_get = (req, res, next) => {
  */
 module.exports.uploadImage = function(req, res, next) {
   file.saveFile(req)
-    .then(result => res.json(result))
+      .then(result => res.json({
+        errCode: 0,
+        errMessage: 'success',
+        result
+      }))
     .catch(err => res.json(err))
 }

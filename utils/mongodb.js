@@ -33,12 +33,15 @@ module.exports.article_update = article => {
   })
 }
 
+
 module.exports.article_get = id => {
   return new Promise((resolve, reject) => {
     ArticleModel
       .find({ 'id': id })
-      .then(res => resolve(res))
-      .catch(err => reject(err));
+      .then(res => {
+        resolve(res);
+      })
+      .catch(err => reject(err))
   })
 }
 
