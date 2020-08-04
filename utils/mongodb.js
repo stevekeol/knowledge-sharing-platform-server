@@ -45,76 +45,66 @@ module.exports.article_get = id => {
   })
 }
 
-// module.exports.articles_get = option => {
-//   console.log(option);
-//   //此处根据规则，指定在数据库高效搜索的具体方式
-//   return new Promise((resolve, reject) => {
-//     ArticleModel
-//       .find()
-//       .then(res => resolve(res))
-//       .catch(err => reject(err));
-//   })
-// }
 
-
+//尚有优化空间
 module.exports.articles_get = options => {
 
-  // let options = {
-  //   keywords: ['文章内容', '更改', 'C'], //'A | B | C'
-  //   author: '124',
-  //   categories: ['新人', '开发'],
-  //   state: 'edit',
-  //   path: ['0-1']
-  // }
+  function help1(opt) {
+    let result = {
+      $and: []
+    };
 
-  // let options = {
-  //   keywords: ['文章内容', '更改', 'C'] //'A | B | C'
-
-  // }
-
-  let result1 = {
-    $and: [
-      { author: options.author}, 
-      { categories: { $in: options.categories }},
-      { state: options.state },
-      { path: { $in: options.path }}
-    ]
+    for(let key in opt) {
+      if(key === 'author') {
+        result.$and.push({ author: opt.author})
+      }
+      if(key === 'categories') {
+        result.$and.push({ categories: { $in: opt.categories }})
+      }
+      if(key === 'state') {
+        result.$and.push({ state: opt.state})
+      }
+      if(key === 'path') {
+        result.$and.push({ path: opt.path})
+      }                  
+    }
+    if(!result.$and.length) {
+      delete result.$and;
+    }
+    return result;
   }
 
-  let regex = options.keywords.join("|");
+  function help2(opt) {
+    if(!opt.keywords) {
+      return {};
+    }
 
-// //且
-//   let result2 = {
-//     $or: [
-//       // { author: { $and: options.keywords } },
-//       { tags: { $and: ['文章内容', '更改'] } },
+    let regex;
+    if(opt.keywords && opt.keywords.length) {
+      regex = opt.keywords.join("|");
+    } else {
+      regex = new RegExp(/[.\n]*/)
+    }
 
-//       // { content: { $regex: regex } },
-//       // { abstract: { $regex: regex } },
-//       // { content: { $regex: regex } },
-//       // { name: { $regex: regex } }
-//     ]
-//   }
+    let result2 = {
+      $or: [
+        { author: { $in: opt.keywords } },
+        { tags: { $in: opt.keywords } },
 
-//或
-  let result2 = {
-    $or: [
-      { author: { $in: options.keywords } },
-      { tags: { $in: options.keywords } },
-
-      { content: { $regex: regex } },
-      { abstract: { $regex: regex } },
-      { content: { $regex: regex } },
-      { name: { $regex: regex } }
-    ]
+        { content: { $regex: regex } },
+        { abstract: { $regex: regex } },
+        { content: { $regex: regex } },
+        { name: { $regex: regex } }
+      ]
+    }
+    return result2;
   }
-
 
   //此处根据规则，指定在数据库高效搜索的具体方式
   return new Promise((resolve, reject) => {
     ArticleModel
-      .find(result1)
-      .find(result2)
+      .find(help1(options))
+      .find(help2(options))
       .then(res => resolve(res))
       .catch(err => reject(err));
   })

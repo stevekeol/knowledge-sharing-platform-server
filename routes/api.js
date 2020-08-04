@@ -59,12 +59,10 @@ module.exports.article_get = (req, res, next) => {
  */
 module.exports.articles_get = (req, res, next) => {
   //支持以 '' 或 | 或 ',' 或 '，'分隔的字符串
-    console.log(req.body.keywords);
-  if(req.body.keywords) {
-    req.body.keywords = req.body.keywords.split(/['|', ' ', ',', '，']/);
-    console.log(req.body.keywords);
+  if(req.query.keywords) {
+    req.query.keywords = req.query.keywords.split(/['|', ' ', ',', '，']/);
   }
-  mongodb.articles_get(req.body)
+  mongodb.articles_get(req.query)
     .then(result => res.json({
       errCode: 0,
       errMessage: 'success',
