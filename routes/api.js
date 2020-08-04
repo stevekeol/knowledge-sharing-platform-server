@@ -66,7 +66,10 @@ module.exports.articles_get = (req, res, next) => {
     .then(result => res.json({
       errCode: 0,
       errMessage: 'success',
-      result
+      result: {
+        list: result,
+        total: result.length
+      }
     }))
     .catch(err => res.json(err))
 }
