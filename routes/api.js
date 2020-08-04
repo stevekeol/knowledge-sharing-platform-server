@@ -58,8 +58,13 @@ module.exports.article_get = (req, res, next) => {
  * @return {Object} article(created or updated)
  */
 module.exports.articles_get = (req, res, next) => {
-  console.log(req.query);
-  mongodb.articles_get(req.query)
+  //支持以 '' 或 | 或 ',' 或 '，'分隔的字符串
+    console.log(req.body.keywords);
+  if(req.body.keywords) {
+    req.body.keywords = req.body.keywords.split(/['|', ' ', ',', '，']/);
+    console.log(req.body.keywords);
+  }
+  mongodb.articles_get(req.body)
     .then(result => res.json({
       errCode: 0,
       errMessage: 'success',
@@ -81,4 +86,15 @@ module.exports.uploadImage = function(req, res, next) {
         result
       }))
     .catch(err => res.json(err))
+}
+
+
+/**
+ * Helper: 根据复杂的关键字段，生成Mongodb搜索的filterOption
+ * @param { Object } req.body
+ * @return { Object } filterOption
+ */
+
+const generateFilterOption = (options) => {
+
 }
