@@ -63,14 +63,16 @@ module.exports.articles_get = (req, res, next) => {
     req.query.keywords = req.query.keywords.split(/['|', ' ', ',', '，']/);
   }
   mongodb.articles_get(req.query)
-    .then(result => res.json({
+    .then(result => {
+      res.json({
       errCode: 0,
       errMessage: 'success',
       result: {
-        list: result,
-        total: result.length
+        list: result.list,
+        total: result.total
       }
-    }))
+    })
+    })
     .catch(err => res.json(err))
 }
 

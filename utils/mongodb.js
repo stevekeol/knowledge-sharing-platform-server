@@ -39,16 +39,32 @@ module.exports.article_get = id => {
     ArticleModel
       .find({ 'id': id })
       .then(res => {
-        resolve(res);
+        resolve(res[0]);
       })
       .catch(err => reject(err))
   })
 }
 
-
 //尚有优化空间
 module.exports.articles_get = options => {
 
+  //封装： mongodb两次查询（count + list)
+  async function getPage(currentPage, limit, query) {
+    let result = await Promise.all([
+      ArticleModel.countDocuments(query),
+      ArticleModel.find(query).skip((currentPage - 1) * limit).limit(limit)
+    ])
+    return {
+      total: result[0],
+      list: result[1]
+    }
+  }
+
+  let currentPage = options.currentPage || 1;
+  let limit = options.limit || 0;
+  let total;
+
+  //过滤搜索条件1： 必须同时满足以下字段
   function help1(opt) {
     let result = {
       $and: []
@@ -74,6 +90,7 @@ module.exports.articles_get = options => {
     return result;
   }
 
+  //过滤条件2： 多个字段中任一含有查询字符串即可
   function help2(opt) {
     if(!opt.keywords) {
       return {};
@@ -100,13 +117,15 @@ module.exports.articles_get = options => {
     return result2;
   }
 
-  //此处根据规则，指定在数据库高效搜索的具体方式
-  return new Promise((resolve, reject) => {
-    ArticleModel
-      .find(help1(options))
-      .find(help2(options))
-      .then(res => resolve(res))
-      .catch(err => reject(err));
+  // //此处根据规则，指定在数据库高效搜索的具体方式
+  return new Promise(async (resolve, reject) => {
+    let res;
+    try {
+      res = await getPage(currentPage, parseInt(limit), {...help1(options), ...help2(options)})
+      resolve(res);
+    } catch(err) {
+      reject(err)
+    }
   })
 }
 
