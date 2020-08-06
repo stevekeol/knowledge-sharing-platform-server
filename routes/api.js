@@ -65,13 +65,13 @@ module.exports.articles_get = (req, res, next) => {
   mongodb.articles_get(req.query)
     .then(result => {
       res.json({
-      errCode: 0,
-      errMessage: 'success',
-      result: {
-        list: result.list,
-        total: result.total
-      }
-    })
+        errCode: 0,
+        errMessage: 'success',
+        result: {
+          list: result.list,
+          total: result.total
+        }
+      })
     })
     .catch(err => res.json(err))
 }
@@ -91,13 +91,76 @@ module.exports.uploadImage = function(req, res, next) {
     .catch(err => res.json(err))
 }
 
+/**
+ * search the author.
+ * @param {string} id
+ * @param {string} password
+ * @return {Object} authorModel 
+ */
+
+// module.exports.author_get = function(req, res, next) {
+//   mongodb.author_get(req.query.id, req.query.password)
+//     .then(result => {
+//       res.json({
+//         errCode: 0,
+//         errMessage: 'success',
+//         result
+//       })
+//     })
+//     .catch(err => res.json(err))
+// }
+
+
+/**
+ * 查询部门详情.
+ * @param {string} id
+ * @return {Object} departmentModel
+ */
+module.exports.department_get = function(req, res, next) {
+  mongodb.department_get(req.query.id)
+    .then(result => res.json({
+      errCode: 0,
+      errMessage: 'success',
+      result      
+    }))
+    .catch(err => res.json(err))
+}
+
+/**
+ * 保存/更新部门详情.
+ * @param {Object} departmenModel
+ * @return {Object} departmentModel
+ */
+module.exports.department_post = function(req, res, next) {
+  console.log('*1*: ', req.body);
+  if(req.body && req.body.id) {
+    console.log('*2*: ');
+    mongodb.department_update(req.body)
+      .then(result => res.json({
+        errCode: 0,
+        errMessage: 'success',
+        result      
+      }))
+      .catch(err => res.json(err))
+  } else {
+    console.log('*3*: ');
+    req.body.id = uuid();
+    mongodb.department_create(req.body)
+      .then(result => res.json({
+        errCode: 0,
+        errMessage: 'success',
+        result      
+      }))
+      .catch(err => res.json(err))    
+  }
+}
+
 
 /**
  * Helper: 根据复杂的关键字段，生成Mongodb搜索的filterOption
  * @param { Object } req.body
  * @return { Object } filterOption
  */
-
 const generateFilterOption = (options) => {
 
 }

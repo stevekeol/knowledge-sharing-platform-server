@@ -13,6 +13,7 @@ mongoose.connect(config.mongodbUrl, { useNewUrlParser: true, useUnifiedTopology:
 
 const ArticleModel = mongoose.model('article', models.getSchema('article'));
 const AuthorModel = mongoose.model('author', models.getSchema('author'));
+const DepartmentModel = mongoose.model('department', models.getSchema('department'));
 
 
 module.exports.article_create = article => {
@@ -27,7 +28,7 @@ module.exports.article_create = article => {
 module.exports.article_update = article => {
   return new Promise((resolve, reject) => {
     ArticleModel
-      .findOneAndUpdate({ 'id': article.id }, article)
+      .findOneAndUpdate({ 'id': article.id }, article, { new: true})
       .then(res => resolve(res))
       .catch(err => reject(err))
   })
@@ -129,17 +130,51 @@ module.exports.articles_get = options => {
   })
 }
 
-module.exports.author_auth_get = author => {
+module.exports.author_get = (id, password) => {
   return new Promise((resolve, reject) => {
     AuthorModel
-      .findOne({ "id": author.id }, { "_id": 0, "articles": 0 })
+      .findOne({ "id": id, "password": password }, {"_id": 0, "password": 0})
       .then(res => {
-        if( res.pw === author.pw ) {
+        if(res) {
           resolve(res);
         } else {
-          reject(res);
+          reject({
+            errCode: -1,
+            errMessage: 'authorId or password is wrong',
+            result: null
+          });
         }
       })
+      .catch(err => reject(err));
+  })
+}
+
+module.exports.department_get = id => {
+  return new Promise((resolve, reject) => {
+    DepartmentModel
+      .findOne({ "id": id }, {"_id": 0})
+      .then(res => {
+        resolve(res);
+      })
+      .catch(err => reject(err));
+  })
+}
+
+module.exports.department_update = department => {
+  console.log('*5*: ', department);
+  return new Promise((resolve, reject) => {
+    DepartmentModel
+      .findOneAndUpdate({ "id": department.id }, department, { new: true})
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  })
+}
+
+module.exports.department_create = department => {
+  return new Promise((resolve, reject) => {
+    new DepartmentModel(department)
+      .save()
+      .then(res => resolve(res))
       .catch(err => reject(err));
   })
 }

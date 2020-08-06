@@ -1,19 +1,25 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const department = new Schema({
-  id: String, //部门id
-  parent: String, //父部门id
-  subDepartment: Array, //子部门id数组
-  members: Array //员工id数组
-}, {autoIndex: false, versionKey: false})
-
 const author = new Schema({
   id: String, //作者员工号
   name: String, //作者姓名
-  pw: String, //密码
-  departments: Array, //对象数组，对象属性有: 部门id，author在部门的role
+  password: String, //密码
+  department: String, //所在部门ID
+  isAdmin: Boolean, //作者是否是该部门的admin
+  groups: Array, //作者所在小组的ID集合
   articles: Schema.Types.Mixed, //文件树
+}, {autoIndex: false, versionKey: false})
+
+const department = new Schema({
+  id: String, //部门/小组id
+  name: String, //部门/小组名字
+  desc: String, //部门描述文字
+  parent: String, //父部门/小组id
+  children: Array, //子部门/小组id数组
+  members: Array, //员工id数组
+  sequence: Number, //部门的一个数字标记，用于在父部门内的排序
+  writable: Boolean //功能待敲定
 }, {autoIndex: false, versionKey: false})
 
 const article = new Schema({
@@ -32,15 +38,17 @@ const article = new Schema({
   updateTime: String //文章更新时间
 }, {autoIndex: false, versionKey: false})
 
+
 module.exports = {
   getSchema: function(name) {
     switch(name) {
       case 'author':
         return author;
-      case 'article':
-        return article;
       case 'department':
         return department;
+      case 'article':
+        return article;
     }
   }
 };
+

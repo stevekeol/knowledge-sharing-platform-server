@@ -16,29 +16,28 @@ const secrect = 'BFChainer'; //私盐
  */
 const generateToken = async (req, res, next) => {
   try {
-    let result = await mongodb.author_auth_get(req.body);
+    let result = await mongodb.author_get(req.query.id, req.query.password);
 
     const token = jwt.sign({
       id: result.id,
-      name: result.name,
-      departments: result.departments
+      name: result.name
     },
     'BFChainer',
     {
       expiresIn: 3600 * 24 * 30
     });
 
+    //在header中添加jwt授权的token
     res.setHeader('Authorization', token);
 
+    //此处直接返回给客户端，不再经过后续中间件
     res.json({ 
       errCode: 0,
-      errMessage: 'Token has been added in Headers'
+      errMessage: 'success',
+      result
     });
-  } catch {
-    res.json({ 
-      errCode: -1,
-      errMessage: 'ID or password is invalid'
-    });
+  } catch(err) {
+    res.json(err);
   }
 }
 
