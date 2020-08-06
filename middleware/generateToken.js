@@ -29,6 +29,8 @@ const generateToken = async (req, res, next) => {
 
     //在header中添加jwt授权的token
     res.setHeader('Authorization', token);
+    //让前端可以获取到headers中的字段
+    res.setHeader('Access-Control-Expose-Headers', '*'); 
 
     //此处直接返回给客户端，不再经过后续中间件
     res.json({ 
