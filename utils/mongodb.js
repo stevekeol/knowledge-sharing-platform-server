@@ -161,7 +161,6 @@ module.exports.department_get = id => {
 }
 
 module.exports.department_update = department => {
-  console.log('*5*: ', department);
   return new Promise((resolve, reject) => {
     DepartmentModel
       .findOneAndUpdate({ "id": department.id }, department, { new: true})
@@ -171,10 +170,29 @@ module.exports.department_update = department => {
 }
 
 module.exports.department_create = department => {
+  //待优化：嵌套式的写法可否更新
   return new Promise((resolve, reject) => {
     new DepartmentModel(department)
       .save()
-      .then(res => resolve(res))
+      .then(res => {
+        DepartmentModel
+          .updateOne({id: department.parent}, {$push: {children: department.id}})
+          .then(res => resolve(res))
+          .catch(err => reject(err));
+      })
+  })
+}
+
+
+module.exports.department_delete = id => {
+  return new Promise((resolve, reject) => {
+    console.log(id)
+    DepartmentModel
+      .remove({ "id": id })
+      .then(res => {
+        console.log(res)
+        resolve(res)
+      })
       .catch(err => reject(err));
   })
 }

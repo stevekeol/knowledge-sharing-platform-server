@@ -143,7 +143,6 @@ module.exports.department_post = function(req, res, next) {
       }))
       .catch(err => res.json(err))
   } else {
-    console.log('*3*: ');
     req.body.id = uuid();
     mongodb.department_create(req.body)
       .then(result => res.json({
@@ -155,12 +154,29 @@ module.exports.department_post = function(req, res, next) {
   }
 }
 
-
 /**
- * Helper: 根据复杂的关键字段，生成Mongodb搜索的filterOption
- * @param { Object } req.body
- * @return { Object } filterOption
+ * 删除部门详情.
+ * @param {string} id
+ * @return {Object} departmentModel
  */
-const generateFilterOption = (options) => {
-
+module.exports.department_delete = function(req, res, next) {
+  mongodb.department_delete(req.query.id)
+    .then(result => {
+      console.log('fuxk')
+      console.log(result)
+      if(result.deletedCount === 0) {
+        res.json({
+          errCode: -1,
+          errMessage: 'no this department',
+          result      
+        })
+      } else {
+        res.json({
+          errCode: 0,
+          errMessage: 'success',
+          result
+        })        
+      }
+    })
+    .catch(err => res.json(err))
 }

@@ -19,6 +19,7 @@ router.get('/articles', api.articles_get);
 router.post('/image', api.uploadImage);
 router.post('/department', api.department_post);
 router.get('/department', api.department_get);
+router.delete('/department', api.department_delete);
 
 
 //图片上传 - 测试接口
