@@ -170,17 +170,16 @@ module.exports.department_update = department => {
 }
 
 module.exports.department_create = department => {
-  //待优化：嵌套式的写法可否更新
   return new Promise((resolve, reject) => {
-    new DepartmentModel(department)
-      .save()
-      .then(res => {
-        DepartmentModel
-          .updateOne({id: department.parent}, {$push: {children: department.id}})
-          .then(res => resolve(res))
-          .catch(err => reject(err));
-      })
+    DepartmentModel
+      .findOneAndUpdate({ 'id': 'root', 'children.id': department.path[0] }, 
+                        { '$push': { "children.$.children": department }},
+                        { new: true})
+      .then(res => resolve(res))
+      .catch(err => reject(err));
   })
+
+
 }
 
 

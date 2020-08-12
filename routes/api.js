@@ -134,12 +134,11 @@ module.exports.department_get = function(req, res, next) {
 module.exports.department_post = function(req, res, next) {
   console.log('*1*: ', req.body);
   if(req.body && req.body.id) {
-    console.log('*2*: ');
     mongodb.department_update(req.body)
       .then(result => res.json({
         errCode: 0,
         errMessage: 'success',
-        result      
+        result
       }))
       .catch(err => res.json(err))
   } else {
