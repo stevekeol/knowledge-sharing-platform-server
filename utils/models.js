@@ -15,9 +15,9 @@ const department = new Schema({
   id: String, //部门/小组id
   name: String, //部门/小组名字
   desc: String, //部门描述文字
-  parent: String, //父部门/小组id
+  // parent: String, //父部门/小组id
   children: Array, //子部门/小组id数组
-  members: Array, //员工id数组
+  authors: Array, //员工id数组
   sequence: Number, //部门的一个数字标记，用于在父部门内的排序
   writable: Boolean //功能待敲定
 }, {autoIndex: false, versionKey: false})

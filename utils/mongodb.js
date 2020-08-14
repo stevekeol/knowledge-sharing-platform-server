@@ -6,6 +6,7 @@
 const mongoose = require('mongoose');
 const models = require('./models.js');
 const config = require('./config.js');
+const mongoBridge = require('./mongoBridge.js');
 
 //数据库连接
 mongoose.connect(config.mongodbUrl, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -152,7 +153,7 @@ module.exports.author_get = (id, password) => {
 module.exports.department_get = id => {
   return new Promise((resolve, reject) => {
     DepartmentModel
-      .findOne({ "id": id }, {"_id": 0})
+      .findOne({ "id": 'root' }, {"_id": 0})
       .then(res => {
         resolve(res);
       })
@@ -169,18 +170,48 @@ module.exports.department_update = department => {
   })
 }
 
+
+//Mongoose操作(待修改)
 module.exports.department_create = department => {
   return new Promise((resolve, reject) => {
+    let options = mongoBridge.transDepartmentCreateOption(department.path);
     DepartmentModel
-      .findOneAndUpdate({ 'id': 'root', 'children.id': department.path[0] }, 
-                        { '$push': { "children.$.children": department }},
-                        { new: true})
+      .findOneAndUpdate( 
+        // mongoBridge.getQueryOption(department.path),
+        { id: 'root'},
+        { '$push': { [options.position]: department }},
+        { arrayFilters: options.arrayFilters,
+          new: true
+        }
+      )
       .then(res => resolve(res))
-      .catch(err => reject(err));
+      .catch(err => {
+        console.log(err)
+        reject(err)
+      });
   })
-
-
 }
+
+// //Mongoose操作(转换后的样子)
+// module.exports.department_create = department => {
+//   return new Promise((resolve, reject) => {
+//     let position = 'children.$[id0].children.$[id1].children';
+//     DepartmentModel
+//       .findOneAndUpdate( 
+//         // mongoBridge.getQueryOption(department.path),
+//         { id: 'root'},
+//         { '$push': { [position]: department }},
+//         { arrayFilters: [{'id0.id': department.path[0]}, {'id1.id': department.path[1]}],
+//           new: true
+//         }
+//       )
+//       .then(res => resolve(res))
+//       .catch(err => {
+//         console.log(err)
+//         reject(err)
+//       });
+//   })
+// }
 
 
 module.exports.department_delete = id => {

@@ -132,7 +132,6 @@ module.exports.department_get = function(req, res, next) {
  * @return {Object} departmentModel
  */
 module.exports.department_post = function(req, res, next) {
-  console.log('*1*: ', req.body);
   if(req.body && req.body.id) {
     mongodb.department_update(req.body)
       .then(result => res.json({
