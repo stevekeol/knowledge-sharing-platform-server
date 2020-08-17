@@ -161,26 +161,50 @@ module.exports.department_get = id => {
   })
 }
 
+/*
+ * 1. 更新时，传入的path怎么处理，直接原地改字段，还是要根据path修改该deprtment的路径；
+ * 2. 暂时直接原地更改（待优化）
+ */
+
 module.exports.department_update = department => {
   return new Promise((resolve, reject) => {
     DepartmentModel
-      .findOneAndUpdate({ "id": department.id }, department, { new: true})
-      .then(res => resolve(res))
-      .catch(err => reject(err));
+      .findOne(
+        { id: 'root' }
+      )
+      .then(departments => {
+        let options = mongoBridge.transDepartmentUpdateOption(departments, department);
+        DepartmentModel
+          .findOneAndUpdate(
+            { id: 'root'},
+            { '$set': { [options.position]: options.departments } },
+            { 
+              arrayFilters: options.arrayFilters,
+              new: true
+            }
+          )
+          .then(res => {
+            resolve(res)
+          })
+          .catch(err => {
+            console.log(err);
+            reject(err)
+          });
+        })
   })
 }
 
 
 //Mongoose操作(待修改)
 module.exports.department_create = department => {
+  let options = mongoBridge.transDepartmentCreateOption(department.path);
   return new Promise((resolve, reject) => {
-    let options = mongoBridge.transDepartmentCreateOption(department.path);
     DepartmentModel
       .findOneAndUpdate( 
-        // mongoBridge.getQueryOption(department.path),
+        // mongoBridge.getQueryOption(department.path), //深层次查询的例子
         { id: 'root'},
         { '$push': { [options.position]: department }},
-        { arrayFilters: options.arrayFilters,
+        { arrayFilters: options.arrayFilters, //深层次查询的样子
           new: true
         }
       )
@@ -214,15 +238,44 @@ module.exports.department_create = department => {
 // }
 
 
-module.exports.department_delete = id => {
+// module.exports.department_delete = id => {
+//   return new Promise((resolve, reject) => {
+//     console.log(id)
+//     DepartmentModel
+//       .remove({ "id": id })
+//       .then(res => {
+//         console.log(res)
+//         resolve(res)
+//       })
+//       .catch(err => reject(err));
+//   })
+// }
+
+
+module.exports.department_delete = department => {
   return new Promise((resolve, reject) => {
-    console.log(id)
     DepartmentModel
-      .remove({ "id": id })
-      .then(res => {
-        console.log(res)
-        resolve(res)
-      })
-      .catch(err => reject(err));
+      .findOne(
+        { id: 'root' }
+      )
+      .then(departments => {
+        let options = mongoBridge.transDepartmentDeleteOption(departments, department);
+        DepartmentModel
+          .findOneAndUpdate(
+            { id: 'root'},
+            { '$set': { [options.position]: options.departments } },
+            { 
+              arrayFilters: options.arrayFilters,
+              new: true
+            }
+          )
+          .then(res => {
+            resolve(res)
+          })
+          .catch(err => {
+            console.log(err);
+            reject(err)
+          });
+        })
   })
 }

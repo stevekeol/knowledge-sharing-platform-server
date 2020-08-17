@@ -9,6 +9,7 @@ const author = new Schema({
   isAdmin: Boolean, //作者是否是该部门的admin
   groups: Array, //作者所在小组的ID集合
   articles: Schema.Types.Mixed, //文件树
+  stars: Array //收藏夹
 }, {autoIndex: false, versionKey: false})
 
 const department = new Schema({

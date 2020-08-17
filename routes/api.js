@@ -158,15 +158,13 @@ module.exports.department_post = function(req, res, next) {
  * @return {Object} departmentModel
  */
 module.exports.department_delete = function(req, res, next) {
-  mongodb.department_delete(req.query.id)
+  mongodb.department_delete(req.body)
     .then(result => {
-      console.log('fuxk')
-      console.log(result)
       if(result.deletedCount === 0) {
         res.json({
           errCode: -1,
           errMessage: 'no this department',
-          result      
+          result 
         })
       } else {
         res.json({
