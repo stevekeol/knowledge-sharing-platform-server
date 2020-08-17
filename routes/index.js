@@ -10,10 +10,11 @@ const generateToken = require('../middleware/generateToken.js');
  * get: articles 查询所有符合过滤规则的文章
  * post: image 保存文本写作过程中上传的图片
  * get: login 登录(查询作者)
+ * get: authors 获取所有作者列表
 ****************************************/
-// router.post('/login', generateToken);
 router.get('/login', generateToken);
-router.post('/article', api.article_post);
+router.get('/authors', api.authors_get);
+router.post('/article', api.article_post);``
 router.get('/article', api.article_get);
 router.get('/articles', api.articles_get);
 router.post('/image', api.uploadImage);

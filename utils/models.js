@@ -5,9 +5,9 @@ const author = new Schema({
   id: String, //作者员工号
   name: String, //作者姓名
   password: String, //密码
-  department: String, //所在部门ID
+  department: Array, //所在部门(需要数组吗?)
   isAdmin: Boolean, //作者是否是该部门的admin
-  groups: Array, //作者所在小组的ID集合
+  groups: Array, //作者所在小组
   articles: Schema.Types.Mixed, //文件树
   stars: Array //收藏夹
 }, {autoIndex: false, versionKey: false})

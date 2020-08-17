@@ -9,6 +9,21 @@ const common = require('../utils/common.js');
 const mongodb = require('../utils/mongodb.js');
 
 /**
+ * get authors.
+ * @param {String} id(req.query.id)
+ * @return {Object} article
+ */
+module.exports.authors_get = (req, res, next) => {
+  mongodb.authors_get()
+    .then(result => res.json({
+      errCode: 0,
+      errMessage: 'success',
+      result
+    }))
+    .catch(err => res.json(err))
+}
+
+/**
  * create or update article.
  * @param {Object} article(req.body)
  * @return {Object} article(created or updated)
@@ -164,7 +179,7 @@ module.exports.department_delete = function(req, res, next) {
         res.json({
           errCode: -1,
           errMessage: 'no this department',
-          result 
+          result
         })
       } else {
         res.json({

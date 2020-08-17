@@ -150,6 +150,25 @@ module.exports.author_get = (id, password) => {
   })
 }
 
+module.exports.authors_get = () => {
+  return new Promise((resolve, reject) => {
+    AuthorModel
+      .find({}, {"_id": 0, "password": 0})
+      .then(res => {
+        if(res) {
+          resolve(res);
+        } else {
+          reject({
+            errCode: -1,
+            errMessage: 'something is wrong',
+            result: null
+          });
+        }
+      })
+      .catch(err => reject(err));
+  })
+}
+
 module.exports.department_get = id => {
   return new Promise((resolve, reject) => {
     DepartmentModel
