@@ -14,14 +14,26 @@ const generateToken = require('../middleware/generateToken.js');
 ****************************************/
 router.get('/login', generateToken);
 router.get('/authors', api.authors_get);
-router.post('/article', api.article_post);``
+router.post('/article', api.article_post);
+router.delete('/article', api.article_delete);
 router.get('/article', api.article_get);
 router.get('/articles', api.articles_get);
 router.post('/image', api.uploadImage);
 router.post('/department', api.department_post);
 router.get('/department', api.department_get);
 router.delete('/department', api.department_delete);
+router.post('/star', api.star_post);
+router.get('/stars', api.stars_get);
+router.delete('/star', api.star_delete);
 
+router.get('/my', api.my_get);
+
+router.post('/path', api.path_post);
+router.get('/path', api.path_get);
+router.delete('/path', api.path_delete);
+
+// router.post('/my', api.my_post); //用post /article代替
+// router.delete('/my', api.my_delete);
 
 //图片上传 - 测试接口
 router.get('/test', (req, res, next) => {

@@ -3,38 +3,202 @@
 * 数据库操作层
 *
 ********************************************/
-const mongoose = require('mongoose');
-const models = require('./models.js');
-const config = require('./config.js');
+const { ArticleModel, AuthorModel, DepartmentModel } = require('./models.js');
 const mongoBridge = require('./mongoBridge.js');
 
-//数据库连接
-mongoose.connect(config.mongodbUrl, { useNewUrlParser: true, useUnifiedTopology: true });
 
 
-const ArticleModel = mongoose.model('article', models.getSchema('article'));
-const AuthorModel = mongoose.model('author', models.getSchema('author'));
-const DepartmentModel = mongoose.model('department', models.getSchema('department'));
+/*******************************
+ *
+ * path:
+ * {
+ *   author: "124",
+ *   path: ["article"], //至少有一个元素
+ *   id?: "id0",
+ *   data: {}
+ * }
+ *
+ * *******************************/
+module.exports.path_create = path => {
+  let options = mongoBridge.transPathCreateOption(path.path);
+  
+  if(!path.path.length) {
+    //是否有更好的异常处理
+    console.info('path.length is 0 in /path_create.');
+  }
 
+  return new Promise((resolve, reject) => {
+    AuthorModel
+      .findOneAndUpdate(
+        { id: path.author},
+        { '$push': { [options.position]: path.data }},
+        { arrayFilters: options.arrayFilters, //深层次查询的样子
+          new: true
+        }
+      )
+      .then(res => resolve(res.articles))
+      .catch(err => {
+        console.log(err)
+        reject(err)
+      });
+  })
+}
+
+/*******************************
+ *
+ * path:
+ * {
+ *   author: "124",
+ *   path?: ["article"], //可以为空，则表示直接更改该作者的articles字段
+ *   id?: "id0",
+ *   data: {}/[]
+ * }
+ *
+ * *******************************/
+module.exports.path_update = path => {
+  console.log(path);
+  return new Promise((resolve, reject) => {
+    AuthorModel
+      .findOne(
+        { id: path.author }
+      )
+      .then(pathTree => {
+        let options = mongoBridge.transPathUpdateOption(pathTree.articles, path);
+        AuthorModel
+          .findOneAndUpdate(
+            { id: path.author},
+            { '$set': { [options.position]: options.pathTree } },
+            { 
+              arrayFilters: options.arrayFilters,
+              new: true
+            }
+          )
+          .then(res => {
+            resolve(res.articles)
+          })
+          .catch(err => {
+            console.log(err);
+            reject(err)
+          });
+      })
+  })
+}
+
+module.exports.path_delete = path => {
+  return new Promise((resolve, reject) => {
+    AuthorModel
+      .findOne(
+        { id: path.author }
+      )
+      .then(pathTree => {
+        let options = mongoBridge.transPathDeleteOption(pathTree, path);
+        AuthorModel
+          .findOneAndUpdate(
+            { id: path.author },
+            { '$set': { [options.position]: options.pathTree } },
+            { 
+              arrayFilters: options.arrayFilters,
+              new: true
+            }
+          )
+          .then(res => {
+            resolve(res.articles)
+          })
+          .catch(err => {
+            console.log(err);
+            reject(err)
+          });
+        })
+  })
+}
 
 module.exports.article_create = article => {
-  return new Promise((resolve, reject) => {
-    new ArticleModel(article)
-      .save()
-      .then(res => resolve(res))
-      .catch(err => reject(err))
+  let options = mongoBridge.transArticleCreateOption(article.path);
+
+  async function createArticle(article) {
+    let result = await Promise.all([
+      new ArticleModel(article)
+        .save(),
+      AuthorModel
+        .findOneAndUpdate(
+          { id: article.author},
+          { '$push': { [options.position]: article.id }},
+          { arrayFilters: options.arrayFilters,
+            new: true
+          }
+        )
+      ]);
+
+    return {
+      article: result[0],
+      author: result[1]
+    }
+  }
+
+  return new Promise(async (resolve, reject) => {
+    let res;
+    try {
+      res = await createArticle(article)
+      resolve(res.article);
+    } catch(err) {
+      reject(err)
+    }
   })
 }
 
 module.exports.article_update = article => {
-  return new Promise((resolve, reject) => {
-    ArticleModel
-      .findOneAndUpdate({ 'id': article.id }, article, { new: true})
-      .then(res => resolve(res))
-      .catch(err => reject(err))
+  async function updateArticle(article) {
+    let result = await Promise.all([
+      new ArticleModel(article).save(),
+      AuthorModel
+        .findOne({ 'id': article.author })
+        .then(articlesTree => {
+          let options = mongoBridge.transAuthorUpdateOption(articlesTree, article);
+          AuthorModel
+            .findOneAndUpdate(
+              { id: article.author},
+              { '$set': { [options.position]: options.articlesTree } },
+              { 
+                arrayFilters: options.arrayFilters,
+                new: true
+              }
+            )
+            .then(res => {
+              resolve(res)
+            })
+            .catch(err => {
+              console.log(err);
+              reject(err)
+            });            
+        })
+    ])
+    return {
+      article: result[0],
+      author: result[1]
+    }
+  }
+
+  return new Promise(async (resolve, reject) => {
+    let res;
+    try {
+      res = await updateArticle(article)
+      resolve(res.article);
+    } catch(err) {
+      reject(err)
+    }
   })
 }
 
+module.exports.article_delete = article => {
+  return new Promise((resolve, reject) => {
+    ArticleModel
+      .deleteOne({ 'id': article.id }, { new: true})
+      .then(res => {
+        resolve(res)
+      })
+      .catch(err => reject(err))
+  })
+}
 
 module.exports.article_get = id => {
   return new Promise((resolve, reject) => {
@@ -150,10 +314,10 @@ module.exports.author_get = (id, password) => {
   })
 }
 
-module.exports.authors_get = () => {
+module.exports.authors_get = queryOptions => {
   return new Promise((resolve, reject) => {
     AuthorModel
-      .find({}, {"_id": 0, "password": 0})
+      .find(queryOptions, {"_id": 0, "password": 0})
       .then(res => {
         if(res) {
           resolve(res);
@@ -298,3 +462,116 @@ module.exports.department_delete = department => {
         })
   })
 }
+
+module.exports.stars_get = id => {
+  return new Promise((resolve, reject) => {
+    AuthorModel
+      .find({ 'id': id }, {'stars': 1, '_id': 0})
+      // .populate('stars')
+      .then(res => {
+        resolve(res[0]);
+      })
+      .catch(err => reject(err))
+  })
+}
+
+module.exports.star_post = (authorId, articleId) => {
+  return new Promise((resolve, reject) => {
+    AuthorModel
+      .findOneAndUpdate(
+        { 'id': authorId },
+        { '$push': { stars: articleId } },
+        { new: true}
+      )
+      .then(res => {
+        resolve(res);
+      })
+      .catch(err => reject(err))
+  })
+}
+
+module.exports.star_delete = (authorId, articleId) => {
+  return new Promise((resolve, reject) => {
+    AuthorModel
+      .findOneAndUpdate(
+        { 'id': authorId },
+        { '$pull': { stars: articleId } },
+        { new: true}
+      )
+      .then(res => {
+        resolve(res);
+      })
+      .catch(err => reject(err))
+  })
+}
+
+module.exports.my_get = id => {
+  return new Promise((resolve, reject) => {
+    AuthorModel
+      .find({ 'id': id }, {'articles': 1, '_id': 0})
+      .then(res => {
+        resolve(res[0]);
+      })
+      .catch(err => reject(err))
+  })
+}
+
+module.exports.path_get = id => {
+  return new Promise((resolve, reject) => {
+    AuthorModel
+      .findOne({ 'id': id }, {'articles': 1, '_id': 0})
+      .then(res => {
+        resolve(res.articles);
+      })
+      .catch(err => reject(err))
+  })
+}
+
+
+// //Mongoose操作(待修改)
+// module.exports.my_create = articlesTree => {
+//   let options = mongoBridge.transDepartmentCreateOption(department.path);
+//   return new Promise((resolve, reject) => {
+//     DepartmentModel
+//       .findOneAndUpdate( 
+//         { id: 'root'},
+//         { '$push': { [options.position]: department }},
+//         { arrayFilters: options.arrayFilters, //深层次查询的样子
+//           new: true
+//         }
+//       )
+//       .then(res => resolve(res))
+//       .catch(err => {
+//         console.log(err)
+//         reject(err)
+//       });
+//   })
+// }
+
+// module.exports.my_update = department => {
+//   return new Promise((resolve, reject) => {
+//     DepartmentModel
+//       .findOne(
+//         { id: 'root' }
+//       )
+//       .then(departments => {
+//         let options = mongoBridge.transDepartmentUpdateOption(departments, department);
+//         DepartmentModel
+//           .findOneAndUpdate(
+//             { id: 'root'},
+//             { '$set': { [options.position]: options.departments } },
+//             { 
+//               arrayFilters: options.arrayFilters,
+//               new: true
+//             }
+//           )
+//           .then(res => {
+//             resolve(res)
+//           })
+//           .catch(err => {
+//             console.log(err);
+//             reject(err)
+//           });
+//         })
+//   })
+// }
