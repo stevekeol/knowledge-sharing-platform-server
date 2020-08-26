@@ -519,17 +519,21 @@ module.exports.stars_get = id => {
       // .populate('stars') //暂时不用"填充"运算符
       .then(res => {
         let stars = [];
-        res.stars.map((articleId, index) => {
-          ArticleModel
-            .findOne({id: articleId}, {_id: 0})
-            .then(article => {
-              stars.push(article);
-              //该判断步骤需要优化
-              if(res.stars.length == stars.length) {
-                resolve(stars)
-              }
-            })
-        })
+        if(res.stars.length) {
+          res.stars.map((articleId, index) => {
+            ArticleModel
+              .findOne({id: articleId}, {_id: 0})
+              .then(article => {
+                stars.push(article);
+                //该判断步骤需要优化
+                if(res.stars.length == stars.length) {
+                  resolve(stars)
+                }
+              })
+          })
+        } else {
+          resolve(stars)
+        }
       })
       .catch(err => reject(err))
   })
@@ -551,6 +555,7 @@ module.exports.star_post = (authorId, articleId) => {
 }
 
 module.exports.star_delete = (authorId, articleId) => {
+  console.log(new Date())
   return new Promise((resolve, reject) => {
     AuthorModel
       .findOneAndUpdate(
@@ -559,6 +564,7 @@ module.exports.star_delete = (authorId, articleId) => {
         { new: true}
       )
       .then(res => {
+        console.log(new Date())
         resolve(res);
       })
       .catch(err => reject(err))

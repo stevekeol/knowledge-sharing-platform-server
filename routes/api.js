@@ -282,6 +282,7 @@ module.exports.star_post = (req, res, next) => {
  * @return {Object} article
  */
 module.exports.star_delete = (req, res, next) => {
+  console.log(new Date())
   mongodb.star_delete(req.body.id, req.body.articleId)
     .then(result => res.json({
       errCode: 0,
