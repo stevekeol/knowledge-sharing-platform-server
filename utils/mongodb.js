@@ -146,46 +146,63 @@ module.exports.article_create = article => {
   })
 }
 
-module.exports.article_update = article => {
-  async function updateArticle(article) {
-    let result = await Promise.all([
-      new ArticleModel(article).save(),
-      AuthorModel
-        .findOne({ 'id': article.author })
-        .then(articlesTree => {
-          let options = mongoBridge.transAuthorUpdateOption(articlesTree, article);
-          AuthorModel
-            .findOneAndUpdate(
-              { id: article.author},
-              { '$set': { [options.position]: options.articlesTree } },
-              { 
-                arrayFilters: options.arrayFilters,
-                new: true
-              }
-            )
-            .then(res => {
-              resolve(res)
-            })
-            .catch(err => {
-              console.log(err);
-              reject(err)
-            });            
-        })
-    ])
-    return {
-      article: result[0],
-      author: result[1]
-    }
-  }
+// module.exports.article_update = article => {
+//   async function updateArticle(article) {
+//     let result = await Promise.all([
+//       ArticleModel
+//       .findOneAndUpdate({id: article.id}, article)
+//       .then(res => {
+//         console.log('1')
+//         resolve(res)
+//       }),
+//       // AuthorModel
+//       //   .findOne({ 'id': article.author })
+//       //   .then(articlesTree => {
+//       //     let options = mongoBridge.transAuthorUpdateOption(articlesTree, article);
+//       //     AuthorModel
+//       //       .findOneAndUpdate(
+//       //         { id: article.author},
+//       //         { '$set': { [options.position]: options.articlesTree } },
+//       //         { 
+//       //           arrayFilters: options.arrayFilters,
+//       //           new: true
+//       //         }
+//       //       )
+//       //       .then(res => {
+//       //         console.log(2)
+//       //         resolve(res)
+//       //       })
+//       //       .catch(err => {
+//       //         console.log(err);
+//       //         reject(err)
+//       //       }); 
+//       //   })
+//     ])
+//     return {
+//       article: result[0]
+//     }
+//   }
 
-  return new Promise(async (resolve, reject) => {
-    let res;
-    try {
-      res = await updateArticle(article)
-      resolve(res.article);
-    } catch(err) {
-      reject(err)
-    }
+//   return new Promise(async (resolve, reject) => {
+//     let res;
+//     try {
+//       res = await updateArticle(article)
+//       console.log(res)
+//       resolve(res.article);
+//     } catch(err) {
+//       reject(err)
+//     }
+//   })
+// }
+
+module.exports.article_update = article => {
+  return new Promise((resolve, reject) => {
+    ArticleModel
+    .findOneAndUpdate({id: article.id}, article)
+    .then(res => {
+      resolve(res)
+    })
+    .catch(err => reject(err))  
   })
 }
 
@@ -464,12 +481,55 @@ module.exports.department_delete = department => {
 }
 
 module.exports.stars_get = id => {
+
+  // function getStarsArticle(ids) {
+  //   console.log(2)
+  //   let results = [];
+  //   ids.map(async articleId => {
+  //     console.log(3)
+  //     ArticleModel
+  //       .findOne({ id: articleId })
+  //       .then(article => {
+  //         console.log(4)
+  //         results.push(article)
+  //       })
+  //   })
+  //   console.log(5)
+  //   return results;
+  // }
+
+  // function getStarsArticle(ids) {
+  //   return new Promise((resolve, reject) => {
+  //     let results = [];
+  //     ids.map((articleId, index) => {
+  //       ArticleModel
+  //         .findOne({ id: articleId })
+  //         .then(article => {
+  //           results.push(article)
+  //         })
+  //     })
+
+  //   })
+  // }
+
+
   return new Promise((resolve, reject) => {
     AuthorModel
-      .find({ 'id': id }, {'stars': 1, '_id': 0})
-      // .populate('stars')
+      .findOne({ 'id': id }, {'stars': 1, '_id': 0})
+      // .populate('stars') //暂时不用"填充"运算符
       .then(res => {
-        resolve(res[0]);
+        let stars = [];
+        res.stars.map((articleId, index) => {
+          ArticleModel
+            .findOne({id: articleId}, {_id: 0})
+            .then(article => {
+              stars.push(article);
+              //该判断步骤需要优化
+              if(res.stars.length == stars.length) {
+                resolve(stars)
+              }
+            })
+        })
       })
       .catch(err => reject(err))
   })

@@ -250,6 +250,8 @@ module.exports.transArticleCreateOption = path => {
 }
 
 module.exports.transArticleUpdateOption = (articlesTree, article) => {
+  console.log(articlesTree)
+  console.log(articlesTree)
   let path = article.path;
   let id = article.id;
   let departments = _departments.children;
@@ -282,5 +284,6 @@ module.exports.transArticleUpdateOption = (articlesTree, article) => {
     }
   })
   result.departments = departments;
+  console.log(result)
   return result;
 }
