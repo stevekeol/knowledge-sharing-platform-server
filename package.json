@@ -25,7 +25,7 @@
     "qiniu": "^7.3.0",
     "request": "^2.88.0",
     "serve-favicon": "~2.4.2",
-    "socket.io": "^2.0.3",
+    "socket.io": "^2.5.0",
     "uuid": "^8.2.0"
   }
 }
